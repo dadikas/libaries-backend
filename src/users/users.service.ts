@@ -5,10 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { UserSignUpDto } from './dto/user-signup.dto';
-import {hash} from 'bcrypt';
+import {hash, compare} from 'bcrypt';
+import { UserSignInDto } from './dto/user-signin.dto';
+import { sign } from 'jsonwebtoken';
 
 @Injectable()
 export class UsersService {
+  
 
   constructor(
     @InjectRepository(UserEntity)
@@ -28,6 +31,19 @@ export class UsersService {
     delete user.password;
 
     return user;
+  }
+
+  async signin(userSignInDto:UserSignInDto){
+    const userExit = await this.usersRepository.createQueryBuilder('user').addSelect('user.password').where('user.email = :email', {email: userSignInDto.email}).getOne();
+    if (!userExit) {
+      throw new BadRequestException('User does not exist');
+    }
+    const isPasswordValid = await compare(userSignInDto.password, (await userExit).password);
+    if (!isPasswordValid) {
+      throw new BadRequestException('Password is incorrect');
+    }
+    delete  userExit.password;
+    return userExit;
   }
 
   create(createUserDto: CreateUserDto) {
@@ -52,5 +68,9 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<UserEntity> {
     return await this.usersRepository.findOneBy({ email });
+  }
+
+  async accessToken(user: UserEntity): Promise<string> {
+    return sign({id: user.id, enail: user.email}, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn: process.env.ACCESS_TOKEN_EXPIRES_TIME});
   }
 }
