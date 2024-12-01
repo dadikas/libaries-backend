@@ -1,12 +1,13 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from 'db/data-source';
-import { UsersModule } from './users/users.module';
-import { CurrentUserMiddleware } from './utility/middlewares/current-user.middleware';
+import { UsersModule } from './modules/users/users.module';
+import { CurrentUserMiddleware } from './utility/middwares/current-user.middleware';
+import { CategoriesModule } from './modules/categories/categories.module';
 import path from 'path';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(dataSourceOptions), UsersModule, ],
+  imports: [TypeOrmModule.forRoot(dataSourceOptions), UsersModule, CategoriesModule, ],
   controllers: [],
   providers: [],
 })
