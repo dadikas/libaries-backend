@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorators';
 import { UserEntity } from '../users/entities/user.entity';
 import { CategoryEntity } from './entities/category.entity';
+import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
+import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
+import { Roles } from 'src/utility/common/user-role.enum';
 
 @Controller('categories')
 export class CategoriesController {
@@ -16,15 +19,16 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.categoriesService.findAll();
+  async findAll(): Promise<CategoryEntity[]> {
+    return await this.categoriesService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<CategoryEntity> {
     return await this.categoriesService.findOne(+id);
   }
 
+  @UseGuards(AuthenticationGuard, AuthorizeGuard([Roles.ADMIN]))
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return await this.categoriesService.update(+id, updateCategoryDto);
