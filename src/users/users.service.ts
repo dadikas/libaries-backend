@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { UserSignUpDto } from './dto/user-signup.dto';
 import {hash, compare} from 'bcrypt';
@@ -36,7 +36,7 @@ export class UsersService {
   async signin(userSignInDto:UserSignInDto){
     const userExit = await this.usersRepository.createQueryBuilder('user').addSelect('user.password').where('user.email = :email', {email: userSignInDto.email}).getOne();
     if (!userExit) {
-      throw new BadRequestException('User does not exist');
+      throw new NotFoundException('User does not exist');
     }
     const isPasswordValid = await compare(userSignInDto.password, (await userExit).password);
     if (!isPasswordValid) {
@@ -50,12 +50,16 @@ export class UsersService {
     return 'This action adds a new user';
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.usersRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.usersRepository.findOneBy({id});
+    if(!user){
+      throw new NotFoundException('User does not exist');
+    }
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
