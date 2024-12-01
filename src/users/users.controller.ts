@@ -7,6 +7,9 @@ import { UserEntity } from './entities/user.entity';
 import { UserSignInDto } from './dto/user-signin.dto';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorators';
 import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
+import { AuthorizeRole } from 'src/utility/decorators/authorize-role.deacorator';
+import { Roles } from 'src/utility/common/user-role.enum';
+import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
 
 @Controller('users')
 export class UsersController {
@@ -29,6 +32,8 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @AuthorizeRole(Roles.ADMIN)
+  @UseGuards(AuthenticationGuard, AuthorizeGuard)
   @Get('all')
   async findAll(): Promise<UserEntity[]> {
     return await this.usersService.findAll();
