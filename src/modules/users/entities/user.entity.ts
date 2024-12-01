@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
 import { Roles } from "src/utility/common/user-role.enum";
 import { CategoryEntity } from "src/modules/categories/entities/category.entity";
+import { ProductEntity } from "src/modules/products/entities/product.entity";
 @Entity('users')
 export class UserEntity {
 
@@ -24,4 +25,7 @@ export class UserEntity {
 
     @OneToMany(()=>CategoryEntity, (cat)=>cat.addedBy)
     categories: CategoryEntity[];
+
+    @OneToMany(()=>ProductEntity, (prod)=>prod.addedBy)
+    products: ProductEntity[];
 }
