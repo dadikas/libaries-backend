@@ -1,33 +1,41 @@
 services:
-  database:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce
+  nest_api:
+    build: .
+    container_name: nest_api
+    restart: 'unless-stopped'
     ports:
-      - "5432:5432"
+      - 4400:4400
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres_14
     networks:
       - app_network
 
-  app:
-    build:
-      context: .
-    ports:
-    - "3000:3000"
-    volumes:
-      - .:/usr/src/app 
-      - /usr/src/app/node_modules
-    environment:
-      DB_HOST: database
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: ecommerce
+  migration:
+    build: .
+    env_file:
+      - ./.env
+    command: './wait-for-it.sh nest_postgres:5432 -- yarn run migration:run'
     depends_on:
-      - database
+      - postgres_14
+
+  postgres_14:
+    image: postgres:14
+    container_name: nest_postgres
+    command: ['postgres', '-c', 'log_statement=all']
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=ecommerce
+    ports:
+      - 5429:5432
+    volumes:
+      - ./mount-data:/var/lib/postgresql/data
     networks:
       - app_network
 
 networks:
   app_network:
+    name: app_network
