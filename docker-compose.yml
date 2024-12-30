@@ -1,6 +1,8 @@
 services:
   nest_api:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: nest_api
     restart: 'unless-stopped'
     ports:
