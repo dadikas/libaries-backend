@@ -7,7 +7,7 @@ COPY . .
 RUN yarn install --frozen-lockfile
 RUN yarn run build
 
-EXPOSE 3000
+EXPOSE 4400
 
 # Expose the port the app runs on
 CMD ["yarn", "run", "start:dev"]

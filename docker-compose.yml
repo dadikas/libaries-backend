@@ -32,7 +32,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=ecommerce
     ports:
-      - 5429:5432
+      - 5432:5432
     volumes:
       - ./mount-data:/var/lib/postgresql/data
     networks:
